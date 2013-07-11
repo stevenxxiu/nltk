@@ -31,7 +31,7 @@ class CHILDESCorpusReader(XMLCorpusReader):
     The CHILDES corpus is available at ``http://childes.psy.cmu.edu/``. The XML
     version of CHILDES is located at ``http://childes.psy.cmu.edu/data-xml/``.
     Copy the needed parts of the CHILDES XML corpus into the NLTK data directory
-    (``nltk_data/corpora/CHILDES/``).
+    (``$NLTK_DATA/corpora/CHILDES/``).
 
     For access to the file text use the usual nltk functions,
     ``words()``, ``sents()``, ``tagged_words()`` and ``tagged_sents()``.
@@ -386,8 +386,8 @@ class CHILDESCorpusReader(XMLCorpusReader):
         If no urlbase is passed, we try to calculate it.  This
         requires that the childes corpus was set up to mirror the
         folder hierarchy under childes.psy.cmu.edu/data-xml/, e.g.:
-        nltk_data/corpora/childes/Eng-USA/Cornell/??? or
-        nltk_data/corpora/childes/Romance/Spanish/Aguirre/???
+        $NLTK_DATA/corpora/childes/Eng-USA/Cornell/??? or
+        $NLTK_DATA/corpora/childes/Romance/Spanish/Aguirre/???
 
         The function first looks (as a special case) if "Eng-USA" is
         on the path consisting of <corpus root>+fileid; then if
@@ -431,7 +431,7 @@ class CHILDESCorpusReader(XMLCorpusReader):
 def demo(corpus_root=None):
     """
     The CHILDES corpus should be manually downloaded and saved
-    to ``[NLTK_Data_Dir]/corpora/childes/``
+    to ``$NLTK_DATA/corpora/childes/``
     """
     if not corpus_root:
         from nltk.data import find
@@ -468,7 +468,7 @@ def demo(corpus_root=None):
     except LookupError as e:
         print("""The CHILDES corpus, or the parts you need, should be manually
         downloaded from http://childes.psy.cmu.edu/data-xml/ and saved at
-        [NLTK_Data_Dir]/corpora/childes/
+        $NLTK_DATA/corpora/childes/
             Alternately, you can call the demo with the path to a portion of the CHILDES corpus, e.g.:
         demo('/path/to/childes/data-xml/Eng-USA/")
         """)

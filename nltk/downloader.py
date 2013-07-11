@@ -377,12 +377,6 @@ class Downloader(object):
        server index will be considered 'stale,' and will be
        re-downloaded."""
 
-    # DEFAULT_URL = 'http://nltk.googlecode.com/svn/trunk/nltk_data/index.xml'
-    DEFAULT_URL = 'http://nltk.github.com/nltk_data/'
-    """The default URL for the NLTK data server's index.  An
-       alternative URL can be specified when creating a new
-       ``Downloader`` object."""
-
     #/////////////////////////////////////////////////////////////////
     # Status Constants
     #/////////////////////////////////////////////////////////////////
@@ -405,7 +399,7 @@ class Downloader(object):
     #/////////////////////////////////////////////////////////////////
 
     def __init__(self, server_index_url=None, download_dir=None):
-        self._url = server_index_url or self.DEFAULT_URL
+        self._url = server_index_url or self.get_default_download_url()
         """The URL for the data server's index file."""
 
         self._collections = {}
@@ -435,7 +429,7 @@ class Downloader(object):
 
         # decide where we're going to save things to.
         if self._download_dir is None:
-            self._download_dir = self.default_download_dir()
+            self._download_dir = self.get_default_download_dir()
 
     #/////////////////////////////////////////////////////////////////
     # Information
@@ -906,7 +900,20 @@ class Downloader(object):
             raise
     url = property(_get_url, _set_url)
 
-    def default_download_dir(self):
+    def get_default_download_url(self):
+        """
+        Get the default URL for the NLTK data server's index, depending on python version.
+        An alternative URL can be specified when creating a new
+        ``Downloader`` object.
+        """
+        if sys.version_info.major==2:
+            return 'http://nltk.github.com/nltk_data/'
+        elif sys.version_info.major==3:
+            return 'http://nltk.github.com/nltk_data_3/'
+        else:
+            raise ImportError('Unsupported python version')
+
+    def get_default_download_dir(self):
         """
         Return the directory to which packages will be downloaded by
         default.  This value can be overridden using the constructor,
@@ -914,33 +921,23 @@ class Downloader(object):
         calling ``download()``.
 
         On Windows, the default download directory is
-        ``PYTHONHOME/lib/nltk``, where *PYTHONHOME* is the
-        directory containing Python, e.g. ``C:\\Python25``.
+        ``%APPDATA%/$NLTK_DATA``
 
-        On all other platforms, the default directory is the first of
+        On all other platforms, the default download directory is the first of
         the following which exists or which can be created with write
         permission: ``/usr/share/nltk_data``, ``/usr/local/share/nltk_data``,
         ``/usr/lib/nltk_data``, ``/usr/local/lib/nltk_data``, ``~/nltk_data``.
         """
         # Check if we have sufficient permissions to install in a
         # variety of system-wide locations.
-        for nltkdir in nltk.data.path:
-            if (os.path.exists(nltkdir) and
-                nltk.internals.is_writable(nltkdir)):
+        for nltkdir in nltk.data.paths:
+            if os.path.exists(nltkdir) and nltk.internals.is_writable(nltkdir):
                 return nltkdir
-
-        # On Windows, use %APPDATA%
-        if sys.platform == 'win32' and 'APPDATA' in os.environ:
-            homedir = os.environ['APPDATA']
-
-        # Otherwise, install in the user's home directory.
-        else:
-            homedir = os.path.expanduser('~/')
-            if homedir == '~/':
-                raise ValueError("Could not find a default download directory")
-
-        # append "nltk_data" to the home directory
-        return os.path.join(homedir, 'nltk_data')
+        try:
+            defaultdir=nltk.data.get_default_paths()[0]
+        except IndexError:
+            raise ValueError("Could not find a default download directory")
+        return defaultdir
 
     def _get_download_dir(self):
         """

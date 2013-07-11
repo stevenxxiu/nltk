@@ -37,7 +37,6 @@ import sys
 import io
 import os
 import textwrap
-import weakref
 import re
 import zipfile
 import codecs
@@ -61,31 +60,67 @@ from nltk import compat
 # Search Path
 ######################################################################
 
-path = []
+paths = []
 """A list of directories where the NLTK data package might reside.
    These directories will be checked in order when looking for a
    resource in the data package.  Note that this allows users to
    substitute in their own versions of resources, if they have them
    (e.g., in their home directory under ~/nltk_data)."""
 
-# User-specified locations:
-path += [d for d in os.environ.get('NLTK_DATA', str('')).split(os.pathsep) if d]
-if os.path.expanduser('~/') != '~/': path += [
-    os.path.expanduser(str('~/nltk_data'))]
+def get_envname():
+    if sys.version_info.major==2:
+        return 'NLTK_DATA'
+    elif sys.version_info.major==3:
+        return 'NLTK_DATA_3'
+    else:
+        raise ImportError('Unsupported python version')
 
-# Common locations on Windows:
-if sys.platform.startswith('win'): path += [
-    str(r'C:\nltk_data'), str(r'D:\nltk_data'), str(r'E:\nltk_data'),
-    os.path.join(sys.prefix, str('nltk_data')),
-    os.path.join(sys.prefix, str('lib'), str('nltk_data')),
-    os.path.join(os.environ.get(str('APPDATA'), str('C:\\')), str('nltk_data'))]
+def get_default_dirname():
+    if sys.version_info.major==2:
+        return 'nltk_data'
+    elif sys.version_info.major==3:
+        return 'nltk_data_3'
+    else:
+        raise ImportError('Unsupported python version')
 
-# Common locations on UNIX & OS X:
-else: path += [
-    str('/usr/share/nltk_data'),
-    str('/usr/local/share/nltk_data'),
-    str('/usr/lib/nltk_data'),
-    str('/usr/local/lib/nltk_data')]
+def get_user_paths():
+    # User-specified locations
+    envname=get_envname()
+    return [d for d in os.environ.get(envname, '').split(os.pathsep) if d]
+
+def get_default_paths():
+    paths=[]
+    dirname=get_default_dirname()
+
+    # Home dir
+    homedir = os.path.expanduser('~')
+    if homedir == '~':
+        homedir = None
+
+    if sys.platform.startswith('win'):
+        # Common locations on Windows
+        paths.append(os.path.join(os.environ.get('APPDATA', 'C:\\'), dirname))
+        if homedir:
+            paths.append(os.path.join(homedir, dirname))
+        paths += [
+            str('C:\\' + dirname), str('D:\\' + dirname), str('E:\\' + dirname),
+            os.path.join(sys.prefix, dirname),
+            os.path.join(sys.prefix, 'lib', dirname),
+        ]
+    else:
+        # Common locations on UNIX & OS X
+        if homedir:
+            paths.append(os.path.join(homedir, dirname))
+        paths += [
+            '/usr/share/' + dirname,
+            '/usr/local/share/' + dirname,
+            '/usr/lib/' + dirname,
+            '/usr/local/lib/' + dirname,
+        ]
+    return paths
+
+paths.extend(get_user_paths())
+paths.extend(get_default_paths())
 
 ######################################################################
 # Path Pointers
@@ -439,7 +474,7 @@ def find(resource_name):
     zipfile, zipentry = m.groups()
 
     # Check each item in our path
-    for path_item in path:
+    for path_item in paths:
 
         # Is the path item a zipfile?
         if os.path.isfile(path_item) and path_item.endswith('.zip'):
@@ -477,7 +512,7 @@ def find(resource_name):
         'obtain the resource:  >>> nltk.download()' %
         (resource_name,), initial_indent='  ', subsequent_indent='  ',
         width=66)
-    msg += '\n  Searched in:' + ''.join('\n    - %r' % d for d in path)
+    msg += '\n  Searched in:' + ''.join('\n    - %r' % d for d in paths)
     sep = '*'*70
     resource_not_found = '\n%s\n%s\n%s' % (sep, msg, sep)
     raise LookupError(resource_not_found)
@@ -1246,7 +1281,7 @@ class SeekableUnicodeStreamReader(object):
 
         return None
 
-__all__ = ['path', 'PathPointer', 'FileSystemPathPointer', 'BufferedGzipFile',
+__all__ = ['paths', 'PathPointer', 'FileSystemPathPointer', 'BufferedGzipFile',
            'GzipFileSystemPathPointer', 'GzipFileSystemPathPointer',
            'find', 'retrieve', 'FORMATS', 'AUTO_FORMATS', 'load',
            'show_cfg', 'clear_cache', 'LazyLoader', 'OpenOnDemandZipFile',

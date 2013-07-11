@@ -10,4 +10,4 @@ def setup_module(module):
         print(e)
         raise SkipTest("The CHILDES corpus is not found. "
                        "It should be manually downloaded and saved/unpacked "
-                       "to [NLTK_Data_Dir]/corpora/childes/")
+                       "to $NLTK_DATA/corpora/childes/")

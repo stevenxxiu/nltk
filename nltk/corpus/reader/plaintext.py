@@ -47,7 +47,7 @@ class PlaintextCorpusReader(CorpusReader):
         Construct a new plaintext corpus reader for a set of documents
         located at the given root directory.  Example usage:
 
-            >>> root = '/usr/local/share/nltk_data/corpora/webtext/'
+            >>> root = os.path.expandvars('$NLTK_DATA/corpora/webtext/')
             >>> reader = PlaintextCorpusReader(root, '.*\.txt') # doctest: +SKIP
 
         :param root: The root directory for this corpus.
