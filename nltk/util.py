@@ -8,7 +8,7 @@ from __future__ import print_function
 
 import locale
 import re
-import types
+import sys
 import textwrap
 import pydoc
 import bisect
@@ -18,8 +18,7 @@ from itertools import islice, chain
 from pprint import pprint
 from collections import defaultdict, deque
 from sys import version_info
-from lxml import html
-from bs4 import UnicodeDammit
+from bs4 import BeautifulSoup, Comment
 
 from nltk.internals import slice_bounds, raise_unorderable_types
 from nltk import compat
@@ -340,28 +339,22 @@ def clean_html(content, encoding=None):
         issues surrounding lxml's parsing of unicode strings,
         cf https://bugs.launchpad.net/lxml/+bug/1002581
     :type content: bytes
-    :param encoding: the encoding of content or possible encodings for bs4 to guess
+    :param encoding: encoding of content for bs4
     :type encoding: str
-    :type encoding: list
     :rtype: str
     """
-    if isinstance(encoding,list):
-        override_encodings=encoding
-    else:
-        override_encodings=[]
-    if not encoding or isinstance(encoding,list):
-        doc = UnicodeDammit(content, override_encodings, is_html=True)
-        if not doc.unicode_markup:
-            raise UnicodeDecodeError(
-                "Failed to detect encoding, tried {}".format(
-                ', '.join(doc.tried_encodings)))
-        content = doc.unicode_markup.encode()
-        encoding = 'utf-8'
-    parser = html.HTMLParser(encoding=encoding)
-    root = html.document_fromstring(content, parser=parser)
-    cleaned = ' '.join(root.itertext())
+    def visible(element):
+        if element.parent.name in ['style', 'script', '[document]', 'head'] or isinstance(element, Comment):
+            return False
+        return True
+
+    soup = BeautifulSoup(content, from_encoding=encoding)
+    texts = soup.findAll(text=True)
+    cleaned = ' '.join(filter(visible, texts))
     # deal with whitespace, including tabs
-    cleaned = re.sub(r"\s+", " ", cleaned, re.UNICODE)
+    # python 2.6 support
+    whitespace = re.compile(r'\s+', flags=re.UNICODE)
+    cleaned = whitespace.sub(' ', cleaned)
     return cleaned.strip()
 
 def clean_url(url):
