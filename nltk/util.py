@@ -18,6 +18,8 @@ from itertools import islice, chain
 from pprint import pprint
 from collections import defaultdict, deque
 from sys import version_info
+from lxml import html
+from bs4 import UnicodeDammit
 
 from nltk.internals import slice_bounds, raise_unorderable_types
 from nltk import compat
@@ -330,26 +332,36 @@ def invert_graph(graph):
 # HTML Cleaning
 ##########################################################################
 
-def clean_html(html):
+def clean_html(content, encoding=None):
     """
     Remove HTML markup from the given string.
 
-    :param html: the HTML string to be cleaned
-    :type html: str
+    :param content: the HTML byte string to be cleaned, bytes are used due to
+        issues surrounding lxml's parsing of unicode strings,
+        cf https://bugs.launchpad.net/lxml/+bug/1002581
+    :type content: bytes
+    :param encoding: the encoding of content or possible encodings for bs4 to guess
+    :type encoding: str
+    :type encoding: list
     :rtype: str
     """
-
-    # First we remove inline JavaScript/CSS:
-    cleaned = re.sub(r"(?is)<(script|style).*?>.*?(</\1>)", "", html.strip())
-    # Then we remove html comments. This has to be done before removing regular
-    # tags since comments can contain '>' characters.
-    cleaned = re.sub(r"(?s)<!--(.*?)-->[\n]?", "", cleaned)
-    # Next we can remove the remaining tags:
-    cleaned = re.sub(r"(?s)<.*?>", " ", cleaned)
-    # Finally, we deal with whitespace
-    cleaned = re.sub(r"&nbsp;", " ", cleaned)
-    cleaned = re.sub(r"  ", " ", cleaned)
-    cleaned = re.sub(r"  ", " ", cleaned)
+    if isinstance(encoding,list):
+        override_encodings=encoding
+    else:
+        override_encodings=[]
+    if not encoding or isinstance(encoding,list):
+        doc = UnicodeDammit(content, override_encodings, is_html=True)
+        if not doc.unicode_markup:
+            raise UnicodeDecodeError(
+                "Failed to detect encoding, tried {}".format(
+                ', '.join(doc.tried_encodings)))
+        content = doc.unicode_markup.encode()
+        encoding = 'utf-8'
+    parser = html.HTMLParser(encoding=encoding)
+    root = html.document_fromstring(content, parser=parser)
+    cleaned = ' '.join(root.itertext())
+    # deal with whitespace, including tabs
+    cleaned = re.sub(r"\s+", " ", cleaned, re.UNICODE)
     return cleaned.strip()
 
 def clean_url(url):
