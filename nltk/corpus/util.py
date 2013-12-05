@@ -22,7 +22,8 @@ class LazyCorpusLoader(object):
     """
     ==================================================================
     To see the API documentation for this lazily loaded corpus, first
-    run corpus.ensure_loaded(), and then run help(this_corpus).
+    ensure that the corpus is loaded, e.g. by running
+    corpus.ensure_loaded() or corpus.words(), then run help(this_corpus)
     ==================================================================
     
     LazyCorpusLoader is a proxy object which is used to stand in for a
