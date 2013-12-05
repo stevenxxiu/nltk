@@ -16,6 +16,7 @@ import nltk
 from nltk.compat import python_2_unicode_compatible
 
 TRY_ZIPFILE_FIRST = False
+LAZY_LOAD_DOCSTRINGS = False
 
 @python_2_unicode_compatible
 class LazyCorpusLoader(object):
@@ -113,6 +114,15 @@ class LazyCorpusLoader(object):
         # '_unload' method may be unattached, so __getattr__ can be called;
         # we shouldn't trigger corpus loading again in this case.
         pass
+
+
+def create_lazy_corpus_loader(name, reader_cls, *args, **kwargs):
+    lazy_name = 'Lazy' + reader_cls.__name__
+    lazy_dict = dict(LazyCorpusLoader.__dict__)
+    if not LAZY_LOAD_DOCSTRINGS:
+        lazy_dict['__doc__'] = reader_cls.__doc__
+    return type(lazy_name, (LazyCorpusLoader,) + LazyCorpusLoader.__bases__, lazy_dict)\
+        (name, reader_cls, *args, **kwargs)
 
 
 def _make_bound_method(func, self):

@@ -117,7 +117,7 @@ def demo():
     import nltk
     from nltk.corpus.util import LazyCorpusLoader
 
-    jeita = LazyCorpusLoader(
+    jeita = create_lazy_corpus_loader(
         'jeita', ChasenCorpusReader, r'.*chasen', encoding='utf-8')
     print('/'.join( jeita.words()[22100:22140] ))
 
@@ -129,7 +129,7 @@ def test():
 
     from nltk.corpus.util import LazyCorpusLoader
 
-    jeita = LazyCorpusLoader(
+    jeita = create_lazy_corpus_loader(
         'jeita', ChasenCorpusReader, r'.*chasen', encoding='utf-8')
 
     assert isinstance(jeita.tagged_words()[0][1], compat.string_types)

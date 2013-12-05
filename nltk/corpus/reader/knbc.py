@@ -131,7 +131,7 @@ def demo():
         cells = x.split('-')
         return (cells[0], int(cells[1]), int(cells[2]), int(cells[3]))
 
-    knbc = LazyCorpusLoader('knbc/corpus1', KNBCorpusReader,
+    knbc = create_lazy_corpus_loader('knbc/corpus1', KNBCorpusReader,
                             sorted(fileids, key=_knbc_fileids_sort), encoding='euc-jp')
 
     print(knbc.fileids()[:10])
@@ -150,9 +150,9 @@ def demo():
 
 def test():
 
-    from nltk.corpus.util import LazyCorpusLoader
+    from nltk.corpus.util import create_lazy_corpus_loader
 
-    knbc = LazyCorpusLoader(
+    knbc = create_lazy_corpus_loader(
         'knbc/corpus1', KNBCorpusReader, r'.*/KN.*', encoding='euc-jp')
     assert isinstance(knbc.words()[0], compat.string_types)
     assert isinstance(knbc.sents()[0][0], compat.string_types)
