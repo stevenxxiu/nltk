@@ -23,7 +23,6 @@ If you do, you can skip to the final step and just install NLTK.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #. Install Python: http://www.python.org/download/releases/2.7.3/ (avoid the 64-bit versions)
-#. Install Numpy (optional): http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-win32-superpack-python2.7.exe
 #. Install NLTK: http://pypi.python.org/pypi/nltk
 #. Test installation: ``Start>Python27``, then type ``import nltk``
 
@@ -36,4 +35,15 @@ Source installation (for 32-bit or 64-bit Windows)
 #. Install Pip: ``Start>Run... c:\Python27\Scripts\easy_install pip``
 #. Install NLTK: ``Start>Run... c:\Python27\Scripts\pip install nltk``
 #. Test installation: ``Start>All Programs>Python27>IDLE``, then type ``import nltk``
+
+Optional dependencies
+=====================
+
+Mac/Unix
+--------
+#. Install NumPy, SciPy, Matplotlib, Scikit-Learn from source: run ``pip install -U numpy scipy matplotlib scikit-learn``
+
+Windows
+-------
+#. Install NumPy, SciPy, Matplotlib, Scikit-Learn for the appropriate python version: http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
