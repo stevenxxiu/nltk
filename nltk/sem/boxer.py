@@ -164,7 +164,7 @@ class Boxer(object):
         f = None
         try:
             fd, temp_filename = tempfile.mkstemp(prefix='boxer-', suffix='.in', text=True)
-            f = os.fdopen(fd, 'w')
+            f = os.fdopen(fd, 'wb')
             f.write(candc_out)
         finally:
             if f: f.close()
@@ -205,13 +205,13 @@ class Boxer(object):
             print('Command:', binary + ' ' + ' '.join(args))
 
         # Call via a subprocess
+        cmd = [binary] + args
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
         if input_str is None:
-            cmd = [binary] + args
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = p.communicate()
         else:
-            cmd = 'echo "%s" | %s %s' % (input_str, binary, ' '.join(args))
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        stdout, stderr = p.communicate()
+            stdout, stderr = p.communicate(input=input_str)
 
         if verbose:
             print('Return code:', p.returncode)
