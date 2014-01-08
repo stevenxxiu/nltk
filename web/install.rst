@@ -36,8 +36,8 @@ Source installation (for 32-bit or 64-bit Windows)
 #. Install NLTK: ``Start>Run... c:\Python27\Scripts\pip install nltk``
 #. Test installation: ``Start>All Programs>Python27>IDLE``, then type ``import nltk``
 
-Optional dependencies
-=====================
+Optional python dependencies
+============================
 
 Mac/Unix
 --------
@@ -46,4 +46,7 @@ Mac/Unix
 Windows
 -------
 #. Install NumPy, SciPy, Matplotlib, Scikit-Learn for the appropriate python version: http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+Optional external dependencies
+==============================
 
