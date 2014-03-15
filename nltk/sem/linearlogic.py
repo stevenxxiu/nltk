@@ -412,7 +412,7 @@ class LinearLogicParser(LogicParser):
         function being applied to the arguments.  Otherwise, return the
         argument expression."""
         if self.has_priority(APP, context):
-            if self.inRange(0) and self.token(0) == Tokens.OPEN:
+            if self.in_range(0) and self.token(0) == Tokens.OPEN:
                 self.token() #swallow then open paren
                 argument = self.parse_Expression(APP)
                 self.assertNextToken(Tokens.CLOSE)

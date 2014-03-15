@@ -51,7 +51,7 @@ class TableauProver(Prover):
                     print(e)
                 else:
                     raise e
-        return (result, '\n'.join(debugger.lines))
+        return result, '\n'.join(debugger.lines)
 
     def _attempt_proof(self, agenda, accessible_vars, atoms, debug):
         (current, context), category = agenda.pop_first()
@@ -100,7 +100,7 @@ class TableauProver(Prover):
             return self._attempt_proof(agenda, accessible_vars, atoms, debug+1)
         else:
             #mark all AllExpressions as 'not exhausted' into the agenda since we are (potentially) adding new accessible vars
-            agenda.mark_alls_fresh();
+            agenda.mark_alls_fresh()
             return self._attempt_proof(agenda, accessible_vars|set(current.args), atoms|set([(current, False)]), debug+1)
 
     def _attempt_proof_n_atom(self, current, context, agenda, accessible_vars, atoms, debug):
@@ -116,7 +116,7 @@ class TableauProver(Prover):
             return self._attempt_proof(agenda, accessible_vars, atoms, debug+1)
         else:
             #mark all AllExpressions as 'not exhausted' into the agenda since we are (potentially) adding new accessible vars
-            agenda.mark_alls_fresh();
+            agenda.mark_alls_fresh()
             return self._attempt_proof(agenda, accessible_vars|set(current.term.args), atoms|set([(current.term, True)]), debug+1)
 
     def _attempt_proof_prop(self, current, context, agenda, accessible_vars, atoms, debug):
@@ -126,7 +126,7 @@ class TableauProver(Prover):
             return True
 
         #mark all AllExpressions as 'not exhausted' into the agenda since we are (potentially) adding new accessible vars
-        agenda.mark_alls_fresh();
+        agenda.mark_alls_fresh()
         return self._attempt_proof(agenda, accessible_vars, atoms|set([(current, False)]), debug+1)
 
     def _attempt_proof_n_prop(self, current, context, agenda, accessible_vars, atoms, debug):
@@ -136,7 +136,7 @@ class TableauProver(Prover):
             return True
 
         #mark all AllExpressions as 'not exhausted' into the agenda since we are (potentially) adding new accessible vars
-        agenda.mark_alls_fresh();
+        agenda.mark_alls_fresh()
         return self._attempt_proof(agenda, accessible_vars, atoms|set([(current.term, True)]), debug+1)
 
     def _attempt_proof_app(self, current, context, agenda, accessible_vars, atoms, debug):
@@ -256,7 +256,7 @@ class TableauProver(Prover):
         agenda.put_atoms(atoms)
         agenda.replace_all(current.first, current.second)
         accessible_vars.discard(current.first)
-        agenda.mark_neqs_fresh();
+        agenda.mark_neqs_fresh()
         return self._attempt_proof(agenda, accessible_vars, set(), debug+1)
 
     def _attempt_proof_some(self, current, context, agenda, accessible_vars, atoms, debug):
@@ -336,21 +336,21 @@ class TableauProverCommand(BaseProverCommand):
 
 class Agenda(object):
     def __init__(self):
-        self.sets = tuple(set() for i in range(21))
+        self.sets = tuple(set() for _ in range(21))
 
     def clone(self):
         new_agenda = Agenda()
         set_list = [s.copy() for s in self.sets]
 
-        new_allExs = set()
-        for allEx,_ in set_list[Categories.ALL]:
-            new_allEx = AllExpression(allEx.variable, allEx.term)
+        new_allexs = set()
+        for allex,_ in set_list[Categories.ALL]:
+            new_allex = AllExpression(allex.variable, allex.term)
             try:
-                new_allEx._used_vars = set(used for used in allEx._used_vars)
+                new_allex._used_vars = set(used for used in allex._used_vars)
             except AttributeError:
-                new_allEx._used_vars = set()
-            new_allExs.add((new_allEx,None))
-        set_list[Categories.ALL] = new_allExs
+                new_allex._used_vars = set()
+            new_allexs.add((new_allex,None))
+        set_list[Categories.ALL] = new_allexs
 
         set_list[Categories.N_EQ] = set((NegatedExpression(n_eq.term),ctx)
                                         for (n_eq,ctx) in set_list[Categories.N_EQ])
@@ -392,13 +392,13 @@ class Agenda(object):
                         try:
                             if not ex[0]._exhausted:
                                 s.remove(ex)
-                                return (ex, i)
+                                return ex, i
                         except AttributeError:
                             s.remove(ex)
-                            return (ex, i)
+                            return ex, i
                 else:
-                    return (s.pop(), i)
-        return ((None, None), None)
+                    return s.pop(), i
+        return (None, None), None
 
     def replace_all(self, old, new):
         for s in self.sets:
@@ -529,7 +529,7 @@ class Categories(object):
     ALL      = 20
 
 
-def testTableauProver():
+def test_tableau_prover():
     tableau_test('P | -P')
     tableau_test('P & -P')
     tableau_test('Q', ['P', '(P -> Q)'])
@@ -549,8 +549,6 @@ def testTableauProver():
     tableau_test('all x.all y.all z.(((x = y) & (y = z)) -> (x = z))')
 #    tableau_test('-all x.some y.F(x,y) & some x.all y.(-F(x,y))')
 #    tableau_test('some x.all y.sees(x,y)')
-
-    parse = LogicParser().parse
 
     p1 = 'all x.(man(x) -> mortal(x))'
     p2 = 'man(Socrates)'
@@ -582,7 +580,7 @@ def testTableauProver():
 #    tableau_test(c, [p])
 
 
-def testHigherOrderTableauProver():
+def test_higher_order_tableau_prover():
     tableau_test('believe(j, -lie(b))', ['believe(j, -lie(b) & -cheat(b))'])
     tableau_test('believe(j, lie(b) & cheat(b))', ['believe(j, lie(b))'])
     tableau_test('believe(j, lie(b))', ['lie(b)']) #how do we capture that John believes all things that are true
@@ -602,8 +600,8 @@ def tableau_test(c, ps=None, verbose=False):
     print('%s |- %s: %s' % (', '.join(ps), pc, TableauProver().prove(pc, pps, verbose=verbose)))
 
 def demo():
-    testTableauProver()
-    testHigherOrderTableauProver()
+    test_tableau_prover()
+    test_higher_order_tableau_prover()
 
 if __name__ == '__main__':
     demo()

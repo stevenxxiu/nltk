@@ -1035,7 +1035,7 @@ class DrsDrawer(object):
         (right, first_bottom) = self._handle(expression.first, command, right, self._get_centered_top(y, line_height, first_height))
 
         # Handle the operator
-        right = command(' %s ' % expression.getOp(), right, centred_string_top)[0]
+        right = command(' %s ' % expression.get_op(), right, centred_string_top)[0]
 
         # Handle the second operand
         second_height = expression.second._drawing_height
@@ -1095,7 +1095,7 @@ class DrtParser(LogicParser):
             return self.handle_lambda(tok, context)
 
         elif tok == DrtTokens.OPEN:
-            if self.inRange(0) and self.token(0) == DrtTokens.OPEN_BRACKET:
+            if self.in_range(0) and self.token(0) == DrtTokens.OPEN_BRACKET:
                 return self.handle_DRS(tok, context)
             else:
                 return self.handle_open(tok, context)
@@ -1105,7 +1105,7 @@ class DrtParser(LogicParser):
             return self.handle_DRS(tok, context)
 
         elif self.isvariable(tok):
-            if self.inRange(0) and self.token(0) == DrtTokens.COLON:
+            if self.in_range(0) and self.token(0) == DrtTokens.COLON:
                 return self.handle_prop(tok, context)
             else:
                 return self.handle_variable(tok, context)
@@ -1116,7 +1116,7 @@ class DrtParser(LogicParser):
     def handle_DRS(self, tok, context):
         # a DRS
         refs = self.handle_refs()
-        if self.inRange(0) and self.token(0) == DrtTokens.COMMA: #if there is a comma (it's optional)
+        if self.in_range(0) and self.token(0) == DrtTokens.COMMA: #if there is a comma (it's optional)
             self.token() # swallow the comma
         conds = self.handle_conds(context)
         self.assertNextToken(DrtTokens.CLOSE)
@@ -1125,7 +1125,7 @@ class DrtParser(LogicParser):
     def handle_refs(self):
         self.assertNextToken(DrtTokens.OPEN_BRACKET)
         refs = []
-        while self.inRange(0) and self.token(0) != DrtTokens.CLOSE_BRACKET:
+        while self.in_range(0) and self.token(0) != DrtTokens.CLOSE_BRACKET:
         # Support expressions like: DRS([x y],C) == DRS([x,y],C)
             if refs and self.token(0) == DrtTokens.COMMA:
                 self.token() # swallow the comma
@@ -1136,7 +1136,7 @@ class DrtParser(LogicParser):
     def handle_conds(self, context):
         self.assertNextToken(DrtTokens.OPEN_BRACKET)
         conds = []
-        while self.inRange(0) and self.token(0) != DrtTokens.CLOSE_BRACKET:
+        while self.in_range(0) and self.token(0) != DrtTokens.CLOSE_BRACKET:
             # Support expressions like: DRS([x y],C) == DRS([x, y],C)
             if conds and self.token(0) == DrtTokens.COMMA:
                 self.token() # swallow the comma
